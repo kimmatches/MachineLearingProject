@@ -9,4 +9,4 @@ data = pd.read_csv("train.csv")
 # 상관 관계 분석을 위한 heatmap 출력
 sns.heatmap(data.corr(), annot=True, cmap='coolwarm', linewidths=0.2)
 plt.show()
-# 어어어어
+# 어어어ㅇㄴㅁㅇ
