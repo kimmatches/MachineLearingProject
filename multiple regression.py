@@ -6,62 +6,87 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.linear_model import Ridge
 
 #다중회귀
 # 데이터 불러오기
 train_data = pd.read_csv("train.csv")
-test_data = pd.read_csv("test.csv")
 
 # 상관 관계 분석을 위한 heatmap 출력
+# 상관 관계 분석 정보 -> 운동시간, 온도, BPM, 칼로리 소모량 / 키, 몸무게
 sns.heatmap(train_data.corr(), annot=True, cmap='coolwarm', linewidths=0.2)
 plt.show()
-
-# 상관 관계 분석 정보 -> 운동시간, 온도, BPM, 칼로리 소모량 / 키, 몸무게
-
 # 변수 선택
 input = train_data[["Exercise_Duration", "Body_Temperature(F)", "BPM"]].to_numpy() # 독립 변수
 target = train_data["Calories_Burned"].to_numpy() # 종속 변수
-X_test = test_data[["Exercise_Duration", "Body_Temperature(F)", "BPM"]].to_numpy()
-# plt.plot(input[:, 0]* 10000)
-# plt.plot(input[:, 1])
-# plt.plot(input[:, 2]* 10000)
-# plt.plot(target)
-# plt.show()
 
-# # 데이터 전처리
-# X = X.fillna(X.mean()) # 결측치 처리
-# scaler = StandardScaler()
-# X = scaler.fit_transform(X) # 스케일링
+# input, target 상관관계 그래프
+plt.plot(input[:, 0]* 10000)
+plt.plot(input[:, 1]* 10000)
+plt.plot(input[:, 2]* 10000)
+plt.plot(target* 10000)
+plt.xlim([0, 100])
+plt.legend(("Exercise_Duration",  "Body_Temperature(F)","BPM","Calories_Burned"),loc='upper right')
+plt.show()
 
 poly = PolynomialFeatures(degree=7, include_bias=False)
 poly.fit(input)
 train_poly = poly.transform(input)
 print(np.shape(train_poly))
 
-
-tr_in, ts_in, tr_out, ts_out = train_test_split(
+# 데이터 분할
+input_train, input_test, target_train, target_test = train_test_split(
     train_poly, target, test_size=0.2, random_state=42)
-# # 데이터 분할
-# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# 스케일링
+ss = StandardScaler()
+ss.fit(input_train)
 
+# 모델 훈련
+lr = LinearRegression()
+lr.fit(input_train, target_train)
 # 정확도
-lr=LinearRegression()
-lr.fit(tr_in, tr_out)
-print(lr.score(tr_in, tr_out))
-print(lr.score(ts_in, ts_out))
+print("다중회귀")
+print(lr.score(input_train, target_train))
+print(lr.score(input_test, target_test))
 
-
-# model = LinearRegression()
-# model.fit(X_train, y_train)
+# ## Ridge
+# ss.fit(train_poly)
 #
-# # 모델 평가
-# y_pred = model.predict(X_test)
-# mse = mean_squared_error(y_test, y_pred)
-# rmse = mse ** 0.5
-# r2 = r2_score(y_test, y_pred)
 #
-# print("MSE: ", mse)
-# print("RMSE: ", rmse)
-# print("R-squared: ", r2)
+# X_train_scaled = ss.transform(train_poly)
+# X_test_scaled = ss.transform(train_poly)
 
+X_train_scaled = ss.transform(input_train)
+X_test_scaled = ss.transform(input_test)
+ridge = Ridge()
+# ridge.fit(X_train_scaled, target_train)
+
+# print(ridge.score(X_train_scaled, target_train))
+# print(ridge.score(X_test_scaled, target_test))
+
+train_score = []
+test_score = []
+
+## 적절한 규제 강도 찾기
+alpha_list = [0.001, 0.01, 0.1, 1, 10, 100]
+for alpha in alpha_list:
+    ridge = Ridge(alpha=alpha)
+    ridge.fit(X_train_scaled, target_train)
+    train_score.append(ridge.score(X_train_scaled, target_train))
+    test_score.append(ridge.score(X_test_scaled, target_test))
+# plt.plot(np.log10(alpha_list), train_score)
+# plt.plot(np.log10(alpha_list), test_score)
+# plt.xlabel('alpha')
+# plt.ylabel('R^2')
+# plt.show()
+
+ridge = Ridge(alpha=0.1)
+ridge.fit(X_train_scaled, target_train)
+print("Ridge")
+print(ridge.score(X_train_scaled, target_train))
+print(ridge.score(X_test_scaled, target_test))
+
+# ## Lasso
+
+# X_test = pipeline.transform(ss)
+# Y_pred = lr.predict(X_test)
