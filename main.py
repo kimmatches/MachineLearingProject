@@ -10,3 +10,4 @@ data = pd.read_csv("train.csv")
 sns.heatmap(data.corr(), annot=True, cmap='coolwarm', linewidths=0.2)
 plt.show()
 # 어어어ㅇㄴㅁㅇ
+#커밋 확인 _ 서연
