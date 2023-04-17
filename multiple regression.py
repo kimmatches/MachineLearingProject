@@ -36,7 +36,8 @@ print(np.shape(train_poly))
 
 # 데이터 분할
 input_train, input_test, target_train, target_test = train_test_split(
-    train_poly, target, test_size=0.2, random_state=42)
+    train_poly, target, test_size=0.2)
+# , random_state=42
 # 스케일링
 ss = StandardScaler()
 ss.fit(input_train)
@@ -49,44 +50,60 @@ print("다중회귀")
 print(lr.score(input_train, target_train))
 print(lr.score(input_test, target_test))
 
-# ## Ridge
-# ss.fit(train_poly)
-#
-#
-# X_train_scaled = ss.transform(train_poly)
-# X_test_scaled = ss.transform(train_poly)
-
-X_train_scaled = ss.transform(input_train)
-X_test_scaled = ss.transform(input_test)
+# Ridge
+print("-------Ridge ----")
+from sklearn.linear_model import Ridge
 ridge = Ridge()
-# ridge.fit(X_train_scaled, target_train)
+ridge.fit(input_train, target_train)
+#y_pred = ridge.predict(input_test)
+print(ridge.score(input_train, target_train))
+print(ridge.score(input_test, target_test))
 
-# print(ridge.score(X_train_scaled, target_train))
-# print(ridge.score(X_test_scaled, target_test))
+import matplotlib.pyplot as plt
 
 train_score = []
-test_score = []
+test_score =[]
+alpha_list = [ 0.001, 0.01, 0.1, 1, 10, 100]
 
-## 적절한 규제 강도 찾기
-alpha_list = [0.001, 0.01, 0.1, 1, 10, 100]
 for alpha in alpha_list:
     ridge = Ridge(alpha=alpha)
-    ridge.fit(X_train_scaled, target_train)
-    train_score.append(ridge.score(X_train_scaled, target_train))
-    test_score.append(ridge.score(X_test_scaled, target_test))
-# plt.plot(np.log10(alpha_list), train_score)
-# plt.plot(np.log10(alpha_list), test_score)
-# plt.xlabel('alpha')
-# plt.ylabel('R^2')
-# plt.show()
+    ridge.fit(input_train, target_train)
+    train_score.append(ridge.score(input_train, target_train))
+    test_score.append(ridge.score(input_test, target_test))
 
-ridge = Ridge(alpha=0.1)
-ridge.fit(X_train_scaled, target_train)
-print("Ridge")
-print(ridge.score(X_train_scaled, target_train))
-print(ridge.score(X_test_scaled, target_test))
+plt.plot(np.log10(alpha_list), train_score)
+plt.plot(np.log10(alpha_list), test_score)
+plt.xlabel('alpha')
+plt.ylabel('R^2')
+plt.show()
 
-# ## Lasso
+ridge = Ridge(alpha= 0.1)
+ridge.fit(input_train, target_train)
 
-# X_test = pipeline.transform(ss)
-# Y_pred = lr.predict(X_test)
+print(ridge.score(input_train, target_train))
+print(ridge.score(input_test, target_test))
+
+
+# ## 적절한 규제 강도 찾기
+# alpha_list = [0.001, 0.01, 0.1, 1, 10, 100]
+# for alpha in alpha_list:
+#     ridge = Ridge(alpha=alpha)
+#     ridge.fit(X_train_scaled, target_train)
+#     train_score.append(ridge.score(X_train_scaled, target_train))
+#     test_score.append(ridge.score(X_test_scaled, target_test))
+# # plt.plot(np.log10(alpha_list), train_score)
+# # plt.plot(np.log10(alpha_list), test_score)
+# # plt.xlabel('alpha')
+# # plt.ylabel('R^2')
+# # plt.show()
+#
+# ridge = Ridge(alpha=0.1)
+# ridge.fit(X_train_scaled, target_train)
+# print("Ridge")
+# print(ridge.score(X_train_scaled, target_train))
+# print(ridge.score(X_test_scaled, target_test))
+#
+# # ## Lasso
+#
+# # X_test = pipeline.transform(ss)
+# # Y_pred = lr.predict(X_test)

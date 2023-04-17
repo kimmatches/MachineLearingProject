@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import SGDClassifier
 import numpy as np
-# 로지스틱,K-NN, 로지스틱, SGD
+#K-NN, 로지스틱, SGD
 
 # 데이터 불러오기
 train_data = pd.read_csv("train.csv")
@@ -24,7 +24,7 @@ X_train_scaled = ss.transform(input_train)
 X_test_scaled = ss.transform(input_test)
 
 #K-NN
-kn = KNeighborsClassifier(n_neighbors=3)
+kn = KNeighborsClassifier(n_neighbors=10)
 kn.fit(X_train_scaled, target_train)
 
 print("K-NN")
